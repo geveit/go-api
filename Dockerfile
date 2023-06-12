@@ -3,20 +3,25 @@ FROM golang:1.20-alpine AS builder
 WORKDIR /app
 
 COPY go.mod go.sum ./
+
 RUN go mod download
 
-COPY ./src .
+COPY . .
 
-RUN go build -o bin
+RUN go build -o bin/app ./src
 
 
 FROM alpine:latest
 
-
 WORKDIR /app
 
-COPY --from=builder /app/bin .
+COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/bin/app .
 
-EXPOSE 8080
+EXPOSE 3000
 
-CMD ["./go-api"]
+CMD ["./app"]
+
+# RUN apk add --no-cache bash
+
+# CMD ["/bin/bash"]

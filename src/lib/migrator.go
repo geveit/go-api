@@ -67,7 +67,7 @@ func (m *Migrator) Migrate() error {
 			return fmt.Errorf("Error migrating %s: %w", fileName, err)
 		}
 
-		insertQuery := "INSERT INTO migrations (file_name, timestamp) VALUES (?, now())"
+		insertQuery := "INSERT INTO migrations (file_name, \"timestamp\") VALUES ($1, now())"
 		if _, err := m.dbExecutor.Exec(insertQuery, fileName); err != nil {
 			return fmt.Errorf("Error saving migration %s: %w", fileName, err)
 		}
