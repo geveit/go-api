@@ -19,9 +19,14 @@ func main() {
 	}
 	defer db.Close()
 
-	querier := lib.NewQuerier(db)
+	dbExecutor := lib.NewDBExecutor(db)
 
-	itemRepository := item.NewRepository(querier)
+	migrator := lib.NewMigrator(dbExecutor)
+	if err := migrator.Migrate(); err != nil {
+		log.Fatal(err)
+	}
+
+	itemRepository := item.NewRepository(dbExecutor)
 	itemHandler := item.NewHandler(itemRepository)
 
 	item.RegisterRoutes(server.Router, itemHandler)

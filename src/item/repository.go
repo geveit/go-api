@@ -20,17 +20,17 @@ type Repository interface {
 }
 
 type sqlRepository struct {
-	querier lib.Querier
+	dbExecutor lib.DBExecutor
 }
 
-func NewRepository(querier lib.Querier) Repository {
-	return &sqlRepository{querier: querier}
+func NewRepository(dbExecutor lib.DBExecutor) Repository {
+	return &sqlRepository{dbExecutor: dbExecutor}
 }
 
 func (r *sqlRepository) Insert(item *Item) (uint, error) {
 	query := "INSERT INTO items (name) values (?)"
 
-	result, err := r.querier.Exec(query, item.Name)
+	result, err := r.dbExecutor.Exec(query, item.Name)
 	if err != nil {
 		return 0, err
 	}
@@ -46,7 +46,7 @@ func (r *sqlRepository) Insert(item *Item) (uint, error) {
 func (r *sqlRepository) Delete(id uint) error {
 	query := "DELETE FROM items WHERE id = ?"
 
-	_, err := r.querier.Exec(query, id)
+	_, err := r.dbExecutor.Exec(query, id)
 
 	return err
 }
@@ -54,7 +54,7 @@ func (r *sqlRepository) Delete(id uint) error {
 func (r *sqlRepository) Update(item *Item) error {
 	query := "UPDATE items SET name = ? WHERE id = ?"
 
-	_, err := r.querier.Exec(query, item.Name, item.ID)
+	_, err := r.dbExecutor.Exec(query, item.Name, item.ID)
 
 	return err
 }
@@ -62,7 +62,7 @@ func (r *sqlRepository) Update(item *Item) error {
 func (r *sqlRepository) Get(id uint) (*Item, error) {
 	query := "SELECT id, name FROM items WHERE id = ?"
 
-	row, err := r.querier.QueryRow(query, id)
+	row, err := r.dbExecutor.QueryRow(query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +80,8 @@ func (r *sqlRepository) Get(id uint) (*Item, error) {
 }
 
 func (r *sqlRepository) GetAll() ([]*Item, error) {
-	query := "SELECT id, name FROM users"
-	rows, err := r.querier.Query(query)
+	query := "SELECT id, name FROM items"
+	rows, err := r.dbExecutor.Query(query)
 	if err != nil {
 		return nil, err
 	}

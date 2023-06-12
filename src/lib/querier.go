@@ -4,30 +4,30 @@ import (
 	"database/sql"
 )
 
-type Querier interface {
+type DBExecutor interface {
 	Exec(query string, args ...any) (sql.Result, error)
 	Query(query string, args ...any) (*sql.Rows, error)
 	QueryRow(query string, args ...any) (*sql.Row, error)
 }
 
-type sqlQuerier struct {
+type sqlDBExecutor struct {
 	db *sql.DB
 }
 
-func NewQuerier(db *sql.DB) Querier {
-	return &sqlQuerier{
+func NewDBExecutor(db *sql.DB) DBExecutor {
+	return &sqlDBExecutor{
 		db: db,
 	}
 }
 
-func (q *sqlQuerier) Exec(query string, args ...any) (sql.Result, error) {
-	stmt, err := q.db.Prepare(query)
+func (d *sqlDBExecutor) Exec(query string, args ...any) (sql.Result, error) {
+	stmt, err := d.db.Prepare(query)
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(args)
+	result, err := stmt.Exec(args...)
 	if err != nil {
 		return nil, err
 	}
@@ -35,14 +35,14 @@ func (q *sqlQuerier) Exec(query string, args ...any) (sql.Result, error) {
 	return result, nil
 }
 
-func (q *sqlQuerier) Query(query string, args ...any) (*sql.Rows, error) {
-	stmt, err := q.db.Prepare(query)
+func (d *sqlDBExecutor) Query(query string, args ...any) (*sql.Rows, error) {
+	stmt, err := d.db.Prepare(query)
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(args)
+	rows, err := stmt.Query(args...)
 	if err != nil {
 		return nil, err
 	}
@@ -50,12 +50,12 @@ func (q *sqlQuerier) Query(query string, args ...any) (*sql.Rows, error) {
 	return rows, nil
 }
 
-func (q *sqlQuerier) QueryRow(query string, args ...any) (*sql.Row, error) {
-	stmt, err := q.db.Prepare(query)
+func (d *sqlDBExecutor) QueryRow(query string, args ...any) (*sql.Row, error) {
+	stmt, err := d.db.Prepare(query)
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	return stmt.QueryRow(args), nil
+	return stmt.QueryRow(args...), nil
 }
