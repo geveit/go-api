@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/geveit/go-api/src/lib/querier"
+	"github.com/geveit/go-api/src/lib"
 )
 
 var (
@@ -20,17 +20,17 @@ type Repository interface {
 }
 
 type sqlRepository struct {
-	db *sql.DB
+	querier lib.Querier
 }
 
-func NewRepository(db *sql.DB) Repository {
-	return &sqlRepository{db: db}
+func NewRepository(querier lib.Querier) Repository {
+	return &sqlRepository{querier: querier}
 }
 
 func (r *sqlRepository) Insert(item *Item) (uint, error) {
 	query := "INSERT INTO items (name) values (?)"
 
-	result, err := querier.Exec(r.db, query, item.Name)
+	result, err := r.querier.Exec(query, item.Name)
 	if err != nil {
 		return 0, err
 	}
@@ -46,27 +46,23 @@ func (r *sqlRepository) Insert(item *Item) (uint, error) {
 func (r *sqlRepository) Delete(id uint) error {
 	query := "DELETE FROM items WHERE id = ?"
 
-	if _, err := querier.Exec(r.db, query, id); err != nil {
-		return err
-	}
+	_, err := r.querier.Exec(query, id)
 
-	return nil
+	return err
 }
 
 func (r *sqlRepository) Update(item *Item) error {
 	query := "UPDATE items SET name = ? WHERE id = ?"
 
-	if _, err := querier.Exec(r.db, query, item.Name, item.ID); err != nil {
-		return err
-	}
+	_, err := r.querier.Exec(query, item.Name, item.ID)
 
-	return nil
+	return err
 }
 
 func (r *sqlRepository) Get(id uint) (*Item, error) {
 	query := "SELECT id, name FROM items WHERE id = ?"
 
-	row, err := querier.QueryRow(r.db, query, id)
+	row, err := r.querier.QueryRow(query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +81,7 @@ func (r *sqlRepository) Get(id uint) (*Item, error) {
 
 func (r *sqlRepository) GetAll() ([]*Item, error) {
 	query := "SELECT id, name FROM users"
-	rows, err := querier.Query(r.db, query)
+	rows, err := r.querier.Query(query)
 	if err != nil {
 		return nil, err
 	}

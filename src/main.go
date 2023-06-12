@@ -3,23 +3,15 @@ package main
 import (
 	"database/sql"
 	"log"
-	"net/http"
 
 	"github.com/geveit/go-api/src/item"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/geveit/go-api/src/lib"
+	"github.com/geveit/go-api/src/server"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-const port = ":3000"
-
 func main() {
-	r := chi.NewRouter()
-
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	server := server.NewServer(":3000")
 
 	db, err := sql.Open("pgx", "postgres://postgres:super_secret@localhost:5432/go-api")
 	if err != nil {
@@ -27,10 +19,12 @@ func main() {
 	}
 	defer db.Close()
 
-	itemRepository := item.NewRepository(db)
+	querier := lib.NewQuerier(db)
+
+	itemRepository := item.NewRepository(querier)
 	itemHandler := item.NewHandler(itemRepository)
 
-	item.RegisterRoutes(r, itemHandler)
+	item.RegisterRoutes(server.Router, itemHandler)
 
-	log.Fatal(http.ListenAndServe(":3000", r))
+	server.Run()
 }

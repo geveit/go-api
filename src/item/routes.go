@@ -2,7 +2,7 @@ package item
 
 import "github.com/go-chi/chi"
 
-func RegisterRoutes(r *chi.Mux, h *Handler) {
+func RegisterRoutes(r chi.Router, h *Handler) {
 	r.Route("/items", func(r chi.Router) {
 		r.Route("/{itemId}", func(r chi.Router) {
 			r.Get("/", h.GetItem)
