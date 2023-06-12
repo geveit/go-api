@@ -4,3 +4,4 @@ TODO
 - Move database connection from main
 - Fix Dockerfile
 - Validation
+- Env variables
