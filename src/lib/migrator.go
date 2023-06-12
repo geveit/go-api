@@ -62,6 +62,11 @@ func (m *Migrator) Migrate() error {
 			return fmt.Errorf("Error reading file %s: %w", fileName, err)
 		}
 
+		if err := m.dbExecutor.Begin(); err != nil {
+			return fmt.Errorf("Error starting migration transaction: %w", err)
+		}
+		defer m.dbExecutor.Rollback()
+
 		query := string(data)
 		if _, err := m.dbExecutor.Exec(query); err != nil {
 			return fmt.Errorf("Error migrating %s: %w", fileName, err)
@@ -71,6 +76,8 @@ func (m *Migrator) Migrate() error {
 		if _, err := m.dbExecutor.Exec(insertQuery, fileName); err != nil {
 			return fmt.Errorf("Error saving migration %s: %w", fileName, err)
 		}
+
+		m.dbExecutor.Commit()
 
 		log.Printf("Successfully migrated %s", fileName)
 	}
