@@ -1,0 +1,8 @@
+{
+    "database": {
+        "host": "localhost",
+        "username": "postgres",
+        "password": "super_secret",
+        "database": "go-api"
+    }
+}

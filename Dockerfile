@@ -16,6 +16,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/config.json ./
 COPY --from=builder /app/bin/app .
 
 EXPOSE 3000
