@@ -1,14 +1,18 @@
-package main
+package config
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
 )
+
+type DatabaseConfig struct {
+	Host     string
+	Username string
+	Password string
+	Database string
+}
 
 const (
 	DATABASE_HOST     = "DATABASE_HOST"
@@ -17,8 +21,8 @@ const (
 	DATABASE_DATABASE = "DATABASE_DATABASE"
 )
 
-func getDatabaseConnection() (*sql.DB, error) {
-	filePath := "../config.json"
+func GetDatabaseConfig() (*DatabaseConfig, error) {
+	filePath := "../../config.json"
 	jsonData, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open config.json: %w", err)
@@ -29,24 +33,26 @@ func getDatabaseConnection() (*sql.DB, error) {
 		return nil, fmt.Errorf("Failed to unmarshall json data: %w", err)
 	}
 
-	config := data["database"].(map[string]any)
-	host := config["host"].(string)
-	database := config["database"].(string)
-	password := config["password"].(string)
-	username := config["username"].(string)
+	config := DatabaseConfig{}
+
+	configJson := data["database"].(map[string]any)
+	config.Host = configJson["host"].(string)
+	config.Database = configJson["database"].(string)
+	config.Password = configJson["password"].(string)
+	config.Username = configJson["username"].(string)
 
 	if os.Getenv(DATABASE_HOST) != "" {
-		host = os.Getenv(DATABASE_HOST)
+		config.Host = os.Getenv(DATABASE_HOST)
 	}
 	if os.Getenv(DATABASE_DATABASE) != "" {
-		database = os.Getenv(DATABASE_DATABASE)
+		config.Database = os.Getenv(DATABASE_DATABASE)
 	}
 	if os.Getenv(DATABASE_USERNAME) != "" {
-		username = os.Getenv(DATABASE_USERNAME)
+		config.Username = os.Getenv(DATABASE_USERNAME)
 	}
 	if os.Getenv(DATABASE_PASSWORD) != "" {
-		password = os.Getenv(DATABASE_PASSWORD)
+		config.Password = os.Getenv(DATABASE_PASSWORD)
 	}
 
-	return sql.Open("pgx", "postgres://"+username+":"+password+"@"+host+":5432/"+database)
+	return &config, nil
 }
