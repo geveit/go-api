@@ -4,5 +4,10 @@
         "username": "postgres",
         "password": "super_secret",
         "database": "go-api"
+    },
+    "auth": {
+        "iss": "iss",
+        "aud": "aud",
+        "jwkUri": "certs uri"
     }
 }

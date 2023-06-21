@@ -1,9 +1,6 @@
 package config
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -22,15 +19,9 @@ const (
 )
 
 func GetDatabaseConfig() (*DatabaseConfig, error) {
-	filePath := "../../config.json"
-	jsonData, err := ioutil.ReadFile(filePath)
+	data, err := getJsonReader().readConfigJson()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open config.json: %w", err)
-	}
-
-	var data map[string]any
-	if err := json.Unmarshal(jsonData, &data); err != nil {
-		return nil, fmt.Errorf("Failed to unmarshall json data: %w", err)
+		return nil, err
 	}
 
 	config := DatabaseConfig{}

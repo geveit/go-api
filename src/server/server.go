@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/geveit/go-api/src/lib"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -48,6 +49,8 @@ func NewServer(port string) *ApiServer {
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
+
+	router.Use(lib.AuthMiddleare)
 
 	return &ApiServer{port: port, Router: router}
 }

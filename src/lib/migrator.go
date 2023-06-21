@@ -82,5 +82,7 @@ func (m *Migrator) Migrate() error {
 		log.Printf("Successfully migrated %s", fileName)
 	}
 
+	log.Println("Database up to date")
+
 	return nil
 }
